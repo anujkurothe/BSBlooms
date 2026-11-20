@@ -1,5 +1,5 @@
 import { ArrowDown } from 'lucide-react';
-import { BRAND_NAME, BS_LOGO_URL } from '../data/seedFlowers.ts';
+import { BRAND_NAME, BS_LOGO_URL } from '../catalog/defaultFlowers.ts';
 
 interface HeroScreenProps {
   onSwipeDown: () => void;

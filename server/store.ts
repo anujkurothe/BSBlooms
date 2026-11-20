@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { DEFAULT_STORE_SETTINGS, SEED_FLOWERS } from '../src/data/seedFlowers.ts';
+import { DEFAULT_STORE_SETTINGS, SEED_FLOWERS } from '../src/catalog/defaultFlowers.ts';
 import type { Flower, FlowerDraft, StoreSettings } from '../src/types/flower.ts';
 import {
   computeSwapOrderUpdates,

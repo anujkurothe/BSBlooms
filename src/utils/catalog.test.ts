@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { Flower, StoreSettings } from '../types/flower.ts';
-import { SEED_FLOWERS } from '../data/seedFlowers.ts';
+import { SEED_FLOWERS } from '../catalog/defaultFlowers.ts';
 import {
   buildTelUrl,
   buildWhatsAppMessage,

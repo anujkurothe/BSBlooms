@@ -4,16 +4,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {defineConfig} from 'vite';
 
+const rootDir = import.meta.dirname;
+
 function cleanHostingerDist() {
   return {
     name: 'clean-hostinger-dist',
     closeBundle() {
-      const distAistudio = path.resolve(__dirname, 'dist', 'assets', 'aistudio');
+      const distAistudio = path.resolve(rootDir, 'dist', 'assets', 'aistudio');
       if (fs.existsSync(distAistudio)) {
         fs.rmSync(distAistudio, {recursive: true, force: true});
       }
       const unusedHeroShowcase = path.resolve(
-        __dirname,
+        rootDir,
         'dist',
         'assets',
         'showcase',
@@ -31,7 +33,7 @@ export default defineConfig(() => {
     plugins: [react(), tailwindcss(), cleanHostingerDist()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(rootDir, '.'),
       },
     },
     server: {

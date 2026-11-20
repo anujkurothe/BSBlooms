@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DEFAULT_STORE_SETTINGS, SEED_FLOWERS } from '../data/seedFlowers.ts';
+import { DEFAULT_STORE_SETTINGS, SEED_FLOWERS } from '../catalog/defaultFlowers.ts';
 import type { Flower, FlowerDraft, StoreSettings } from '../types/flower.ts';
 import { sortFlowersByOrder } from '../utils/catalog.ts';
 

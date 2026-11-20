@@ -1,5 +1,5 @@
 import { ArrowUp, ListChecks, MessageCircle, Phone } from 'lucide-react';
-import { BS_LOGO_URL } from '../data/seedFlowers.ts';
+import { BS_LOGO_URL } from '../catalog/defaultFlowers.ts';
 import type { Flower, InquiryDetails, StoreSettings } from '../types/flower.ts';
 import { buildTelUrl, buildWhatsAppMessage, buildWhatsAppUrl } from '../utils/catalog.ts';
 
