@@ -1,0 +1,30 @@
+Options -Indexes
+RewriteEngine On
+
+# Pass Authorization header to PHP (required on Hostinger Apache/LiteSpeed)
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Block direct public access to internal data storage and dotfiles
+RewriteRule ^data(/|$) - [F,L]
+RewriteRule ^\.env - [F,L]
+
+# Route all /api/* requests to api.php
+RewriteRule ^api(/.*)?$ api.php [QSA,L]
+
+# Serve existing files and folders directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# SPA fallback to index.html
+RewriteRule ^ index.html [L]
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(jpg|jpeg|png|webp|svg|ico|woff2)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "^api\.php$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

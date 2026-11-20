@@ -1,0 +1,265 @@
+{
+  "entities": {
+    "Flower": {
+      "title": "Flower Variety",
+      "description": "A bilingual BS Blooms flower variety with display order, specifications, availability, pricing, and photos.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Document identifier for the flower variety",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orderIndex": {
+          "type": "number",
+          "description": "Display order on the vertical swipe showcase"
+        },
+        "nameEn": {
+          "type": "string",
+          "description": "Variety name in English",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "nameHi": {
+          "type": "string",
+          "description": "Variety name in Hindi",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "cropEn": {
+          "type": "string",
+          "description": "Crop name in English (e.g., Gerbera)",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "cropHi": {
+          "type": "string",
+          "description": "Crop name in Hindi (e.g., जरबेरा)",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "typeEn": {
+          "type": "string",
+          "description": "Flower type in English (e.g., Standard)",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "typeHi": {
+          "type": "string",
+          "description": "Flower type in Hindi",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "breederCode": {
+          "type": "string",
+          "description": "Breeder code or catalog code",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "stemLength": {
+          "type": "string",
+          "description": "Stem length specification (e.g., 60 - 65 cm)",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "extraSpecEn": {
+          "type": "string",
+          "description": "Additional specifications in English",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "extraSpecHi": {
+          "type": "string",
+          "description": "Additional specifications in Hindi",
+          "minLength": 0,
+          "maxLength": 280
+        },
+        "availability": {
+          "type": "string",
+          "description": "Current stock status",
+          "enum": ["in_stock", "limited", "out_of_stock"]
+        },
+        "price": {
+          "type": "number",
+          "description": "Optional price in INR; null when price is on inquiry"
+        },
+        "unitEn": {
+          "type": "string",
+          "description": "Unit label in English",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "unitHi": {
+          "type": "string",
+          "description": "Unit label in Hindi",
+          "minLength": 0,
+          "maxLength": 50
+        },
+        "photos": {
+          "type": "array",
+          "description": "List of 1 to 5 photo URLs or compressed data URIs"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Firebase Auth UID of the merchant creator",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp at creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest update"
+        }
+      },
+      "required": [
+        "id",
+        "orderIndex",
+        "nameEn",
+        "nameHi",
+        "cropEn",
+        "cropHi",
+        "typeEn",
+        "typeHi",
+        "breederCode",
+        "stemLength",
+        "extraSpecEn",
+        "extraSpecHi",
+        "availability",
+        "unitEn",
+        "unitHi",
+        "photos",
+        "createdBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StoreSettings": {
+      "title": "Store Settings",
+      "description": "Publicly readable BS Blooms merchant contact information.",
+      "type": "object",
+      "properties": {
+        "shopNameEn": {
+          "type": "string",
+          "description": "Shop name in English",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "shopNameHi": {
+          "type": "string",
+          "description": "Shop name in Hindi",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "description": "Merchant phone number for Call Now",
+          "minLength": 6,
+          "maxLength": 20,
+          "pattern": "^\\+?[0-9\\- ]{6,20}$"
+        },
+        "whatsapp": {
+          "type": "string",
+          "description": "Merchant WhatsApp digits with country code",
+          "minLength": 8,
+          "maxLength": 18,
+          "pattern": "^[0-9]{8,18}$"
+        },
+        "locationEn": {
+          "type": "string",
+          "description": "Location in English",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "locationHi": {
+          "type": "string",
+          "description": "Location in Hindi",
+          "minLength": 0,
+          "maxLength": 150
+        },
+        "hoursEn": {
+          "type": "string",
+          "description": "Market hours in English",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "hoursHi": {
+          "type": "string",
+          "description": "Market hours in Hindi",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Firebase Auth UID of merchant",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest update"
+        }
+      },
+      "required": [
+        "shopNameEn",
+        "shopNameHi",
+        "phone",
+        "whatsapp",
+        "locationEn",
+        "locationHi",
+        "hoursEn",
+        "hoursHi",
+        "updatedBy",
+        "updatedAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "Admin User",
+      "description": "Authorized BS Blooms merchant administrator.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified Google account email",
+          "minLength": 3,
+          "maxLength": 150
+        },
+        "role": {
+          "type": "string",
+          "description": "Administrator role",
+          "enum": ["admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin access was granted"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/flowers/{flowerId}": {
+      "schema": { "$ref": "#/entities/Flower" },
+      "description": "Public BS Blooms flower variety showcase ordered by orderIndex."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Public BS Blooms contact and shop settings."
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Authorized merchant administrator accounts."
+    }
+  }
+}

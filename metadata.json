@@ -1,0 +1,6 @@
+{
+  "name": "Pushpa Vatika — Bilingual Flower Merchant",
+  "description": "Modern bilingual Hindi and English flower merchant storefront with multi-flower WhatsApp inquiry and real-time merchant catalog management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

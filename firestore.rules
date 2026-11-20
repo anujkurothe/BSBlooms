@@ -1,0 +1,194 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'anujkurothe3027@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidPhotoItem(item) {
+      return item is string && item.size() >= 1 && item.size() <= 220000;
+    }
+
+    function isValidPhotoList(photos) {
+      return photos is list &&
+        photos.size() >= 1 &&
+        photos.size() <= 5 &&
+        isValidPhotoItem(photos[0]) &&
+        (photos.size() < 2 || isValidPhotoItem(photos[1])) &&
+        (photos.size() < 3 || isValidPhotoItem(photos[2])) &&
+        (photos.size() < 4 || isValidPhotoItem(photos[3])) &&
+        (photos.size() < 5 || isValidPhotoItem(photos[4]));
+    }
+
+    function isValidFlower(data, flowerId) {
+      return data.keys().hasAll([
+        'id', 'orderIndex', 'nameEn', 'nameHi',
+        'cropEn', 'cropHi', 'typeEn', 'typeHi',
+        'breederCode', 'stemLength', 'extraSpecEn', 'extraSpecHi',
+        'availability', 'unitEn', 'unitHi', 'photos',
+        'createdBy', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'orderIndex', 'nameEn', 'nameHi',
+        'cropEn', 'cropHi', 'typeEn', 'typeHi',
+        'breederCode', 'stemLength', 'extraSpecEn', 'extraSpecHi',
+        'availability', 'price', 'unitEn', 'unitHi', 'photos',
+        'createdBy', 'createdAt', 'updatedAt'
+      ]) &&
+      data.id == flowerId &&
+      data.orderIndex is number && data.orderIndex >= 0 && data.orderIndex <= 10000 &&
+      data.nameEn is string && data.nameEn.size() >= 1 && data.nameEn.size() <= 100 &&
+      data.nameHi is string && data.nameHi.size() >= 1 && data.nameHi.size() <= 120 &&
+      data.cropEn is string && data.cropEn.size() <= 60 &&
+      data.cropHi is string && data.cropHi.size() <= 80 &&
+      data.typeEn is string && data.typeEn.size() <= 60 &&
+      data.typeHi is string && data.typeHi.size() <= 80 &&
+      data.breederCode is string && data.breederCode.size() <= 60 &&
+      data.stemLength is string && data.stemLength.size() <= 60 &&
+      data.extraSpecEn is string && data.extraSpecEn.size() <= 240 &&
+      data.extraSpecHi is string && data.extraSpecHi.size() <= 280 &&
+      data.availability in ['in_stock', 'limited', 'out_of_stock'] &&
+      (!('price' in data) || data.price == null || (data.price is number && data.price >= 0 && data.price <= 1000000)) &&
+      data.unitEn is string && data.unitEn.size() <= 40 &&
+      data.unitHi is string && data.unitHi.size() <= 50 &&
+      isValidPhotoList(data.photos) &&
+      data.createdBy is string && isValidId(data.createdBy) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+        'shopNameEn', 'shopNameHi', 'phone', 'whatsapp',
+        'locationEn', 'locationHi', 'hoursEn', 'hoursHi',
+        'updatedBy', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'shopNameEn', 'shopNameHi', 'phone', 'whatsapp',
+        'locationEn', 'locationHi', 'hoursEn', 'hoursHi',
+        'updatedBy', 'updatedAt'
+      ]) &&
+      data.shopNameEn is string && data.shopNameEn.size() >= 1 && data.shopNameEn.size() <= 80 &&
+      data.shopNameHi is string && data.shopNameHi.size() >= 1 && data.shopNameHi.size() <= 100 &&
+      data.phone is string && data.phone.size() >= 6 && data.phone.size() <= 20 && data.phone.matches('^\\+?[0-9\\- ]{6,20}$') &&
+      data.whatsapp is string && data.whatsapp.size() >= 8 && data.whatsapp.size() <= 18 && data.whatsapp.matches('^[0-9]{8,18}$') &&
+      data.locationEn is string && data.locationEn.size() <= 120 &&
+      data.locationHi is string && data.locationHi.size() <= 150 &&
+      data.hoursEn is string && data.hoursEn.size() <= 80 &&
+      data.hoursHi is string && data.hoursHi.size() <= 100 &&
+      data.updatedBy is string && isValidId(data.updatedBy) &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidAdminUser(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt']) &&
+      data.keys().hasOnly(['email', 'role', 'createdAt']) &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 150 &&
+      data.role == 'admin' &&
+      data.createdAt is timestamp;
+    }
+
+    // Public BS Blooms Flower Varieties (ordered showcase)
+    match /flowers/{flowerId} {
+      allow get: if isValidId(flowerId);
+      allow list: if true;
+
+      allow create: if isAdmin() &&
+        isValidId(flowerId) &&
+        isValidFlower(incoming(), flowerId) &&
+        incoming().createdBy == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isAdmin() &&
+        isValidId(flowerId) &&
+        isValidFlower(incoming(), flowerId) &&
+        incoming().createdBy == existing().createdBy &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'orderIndex', 'nameEn', 'nameHi',
+          'cropEn', 'cropHi', 'typeEn', 'typeHi',
+          'breederCode', 'stemLength', 'extraSpecEn', 'extraSpecHi',
+          'availability', 'price', 'unitEn', 'unitHi',
+          'photos', 'updatedAt'
+        ]);
+
+      allow delete: if isAdmin() && isValidId(flowerId);
+    }
+
+    // Public Store Settings
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'store';
+      allow list: if false;
+
+      allow create: if isAdmin() &&
+        isValidId(settingId) &&
+        settingId == 'store' &&
+        isValidStoreSettings(incoming()) &&
+        incoming().updatedBy == request.auth.uid &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isAdmin() &&
+        isValidId(settingId) &&
+        settingId == 'store' &&
+        isValidStoreSettings(incoming()) &&
+        incoming().updatedBy == request.auth.uid &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'shopNameEn', 'shopNameHi', 'phone', 'whatsapp',
+          'locationEn', 'locationHi', 'hoursEn', 'hoursHi',
+          'updatedBy', 'updatedAt'
+        ]);
+
+      allow delete: if false;
+    }
+
+    // Merchant Admin Roster
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && (isAdmin() || (isVerifiedUser() && request.auth.uid == adminUid));
+      allow list: if isAdmin();
+
+      allow create: if isAdmin() &&
+        isValidId(adminUid) &&
+        isValidAdminUser(incoming()) &&
+        incoming().createdAt == request.time;
+
+      allow update: if isAdmin() &&
+        isValidId(adminUid) &&
+        isValidAdminUser(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['email', 'role']);
+
+      allow delete: if isAdmin() && isValidId(adminUid);
+    }
+  }
+}
