@@ -10,19 +10,25 @@ export function HeroScreen({ onSwipeDown }: HeroScreenProps) {
     <section
       id="hero-screen"
       data-screen="hero"
-      className="relative h-[100dvh] min-h-[100dvh] w-full snap-start snap-always bg-[#637F04] text-white flex flex-col items-center justify-between px-6 py-10 sm:py-12 overflow-hidden"
+      className="relative h-[100dvh] min-h-[100dvh] w-full snap-start snap-always bg-[#637F04] text-white flex flex-col items-center justify-between px-6 sm:px-10 pt-7 pb-9 sm:pt-10 sm:pb-12 overflow-hidden"
     >
-      {/* Top spacer to keep center visual breathing room generous */}
-      <div className="h-6 sm:h-10 shrink-0" aria-hidden="true" />
+      {/* Top-left handwritten greeting matching reference style */}
+      <div className="w-full self-start text-left shrink-0">
+        <p className="font-script font-light text-base sm:text-xl md:text-[22px] leading-relaxed text-white/95 select-none">
+          hello,
+          <br />
+          find peace in 8 different shades,
+        </p>
+      </div>
 
-      {/* Center Stage: Large Gently Floating BS Logo + BSBlooms Text Only */}
+      {/* Center Stage: Large Gently Floating BS Logo + BSBlooms Text */}
       <div className="flex flex-col items-center justify-center text-center my-auto">
         <div className="animate-float-emblem">
           <img
             src={BS_LOGO_URL}
             alt="BSBlooms emblem"
             referrerPolicy="no-referrer"
-            className="w-56 h-56 sm:w-72 sm:h-72 object-contain select-none"
+            className="w-52 h-52 sm:w-68 sm:h-68 md:w-72 md:h-72 object-contain select-none"
           />
         </div>
         <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-white mt-3 sm:mt-4 select-none">
