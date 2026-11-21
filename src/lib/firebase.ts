@@ -64,7 +64,7 @@ export function handleFirestoreError(
 
 async function testConnection() {
   try {
-    await getDocFromServer(doc(db, 'settings', 'store'));
+    await getDocFromServer(doc(db, 'catalogMeta', 'store'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
       console.error('Please check your Firebase configuration.');
@@ -73,3 +73,4 @@ async function testConnection() {
 }
 
 void testConnection();
+

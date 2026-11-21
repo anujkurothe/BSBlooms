@@ -143,3 +143,14 @@ test('buildTelUrl, slugifyFlowerId, and validators catch invalid inputs', () => 
   assert.ok(validatePasswordChange('admin123', 'admin123', 'admin123'));
   assert.equal(validatePasswordChange('admin123', 'blooms2026', 'blooms2026'), null);
 });
+
+test('crypto SHA-256 Web Crypto and pure-JS fallback match Firestore rule default hash', async () => {
+  const { deriveAdminProof, derivePasswordDoubleHash, sha256HexFallback } = await import('./crypto.ts');
+  const proof = await deriveAdminProof('admin123');
+  const doubleHash = await derivePasswordDoubleHash('admin123');
+  assert.equal(proof, 'd43a98388bb026bf2ad4ea7a02e258e3f0373f6b756b3222f7c8014b1105e66b');
+  assert.equal(doubleHash, 'a20454d4606c3a313a012df03140a41c8427c0ba95cc63bd3158492ec95cf44a');
+  assert.equal(sha256HexFallback('bsblooms-admin-v1:admin123'), proof);
+  assert.equal(sha256HexFallback(proof), doubleHash);
+});
+

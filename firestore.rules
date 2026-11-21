@@ -10,6 +10,10 @@ service cloud.firestore {
       return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    function isValidSha256Hex(val) {
+      return val is string && val.size() == 64 && val.matches('^[a-f0-9]{64}$');
+    }
+
     function incoming() {
       return request.resource.data;
     }
@@ -33,6 +37,29 @@ service cloud.firestore {
       );
     }
 
+    // SHA-256(SHA-256("bsblooms-admin-v1:admin123"))
+    function defaultPasswordDoubleHash() {
+      return 'a20454d4606c3a313a012df03140a41c8427c0ba95cc63bd3158492ec95cf44a';
+    }
+
+    function expectedPasswordDoubleHash() {
+      return exists(/databases/$(database)/documents/adminAuth/config)
+        ? get(/databases/$(database)/documents/adminAuth/config).data.passwordDoubleHash
+        : defaultPasswordDoubleHash();
+    }
+
+    function isValidAdminProof(proof) {
+      return isValidSha256Hex(proof) &&
+        hashing.sha256(proof).toHexString().lower() == expectedPasswordDoubleHash();
+    }
+
+    // Atomic batch authorization: requires /adminAuth/gate to be written in the same batch with valid proof
+    function hasValidBatchGate() {
+      return existsAfter(/databases/$(database)/documents/adminAuth/gate) &&
+        getAfter(/databases/$(database)/documents/adminAuth/gate).data.updatedAt == request.time &&
+        isValidAdminProof(getAfter(/databases/$(database)/documents/adminAuth/gate).data.proof);
+    }
+
     function isValidPhotoItem(item) {
       return item is string && item.size() >= 1 && item.size() <= 220000;
     }
@@ -48,6 +75,67 @@ service cloud.firestore {
         (photos.size() < 5 || isValidPhotoItem(photos[4]));
     }
 
+    function isValidCatalogVariety(data, flowerId) {
+      return data.keys().hasAll([
+        'id', 'orderIndex', 'nameEn', 'color',
+        'cropEn', 'typeEn', 'breederCode', 'stemLength',
+        'extraSpecEn', 'availability', 'photos',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'orderIndex', 'nameEn', 'color',
+        'cropEn', 'typeEn', 'breederCode', 'stemLength',
+        'extraSpecEn', 'availability', 'photos',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.id == flowerId &&
+      data.orderIndex is number && data.orderIndex >= 0 && data.orderIndex <= 10000 &&
+      data.nameEn is string && data.nameEn.size() >= 1 && data.nameEn.size() <= 100 &&
+      data.color is string && data.color.size() <= 60 &&
+      data.cropEn is string && data.cropEn.size() <= 60 &&
+      data.typeEn is string && data.typeEn.size() <= 60 &&
+      data.breederCode is string && data.breederCode.size() <= 60 &&
+      data.stemLength is string && data.stemLength.size() <= 60 &&
+      data.extraSpecEn is string && data.extraSpecEn.size() <= 240 &&
+      data.availability in ['in_stock', 'limited', 'out_of_stock'] &&
+      isValidPhotoList(data.photos) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidCatalogMeta(data) {
+      return data.keys().hasAll([
+        'shopNameEn', 'phone', 'whatsapp',
+        'locationEn', 'hoursEn', 'catalogInitialized', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'shopNameEn', 'phone', 'whatsapp',
+        'locationEn', 'hoursEn', 'catalogInitialized', 'updatedAt'
+      ]) &&
+      data.shopNameEn is string && data.shopNameEn.size() >= 1 && data.shopNameEn.size() <= 80 &&
+      data.phone is string && data.phone.size() >= 6 && data.phone.size() <= 20 && data.phone.matches('^\\+?[0-9\\- ]{6,20}$') &&
+      data.whatsapp is string && data.whatsapp.size() >= 8 && data.whatsapp.size() <= 18 && data.whatsapp.matches('^[0-9]{8,18}$') &&
+      data.locationEn is string && data.locationEn.size() <= 120 &&
+      data.hoursEn is string && data.hoursEn.size() <= 80 &&
+      data.catalogInitialized is bool &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidAdminGate(data) {
+      return data.keys().hasAll(['proof', 'updatedAt']) &&
+        data.keys().hasOnly(['proof', 'updatedAt']) &&
+        isValidSha256Hex(data.proof) &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAdminConfig(data) {
+      return data.keys().hasAll(['passwordDoubleHash', 'updatedAt']) &&
+        data.keys().hasOnly(['passwordDoubleHash', 'updatedAt']) &&
+        isValidSha256Hex(data.passwordDoubleHash) &&
+        data.updatedAt is timestamp;
+    }
+
+    // Legacy validation helpers preserved for backward compatibility
     function isValidFlower(data, flowerId) {
       return data.keys().hasAll([
         'id', 'orderIndex', 'nameEn', 'nameHi',
@@ -116,7 +204,74 @@ service cloud.firestore {
       data.createdAt is timestamp;
     }
 
-    // Public BS Blooms Flower Varieties (ordered showcase)
+    // Private Merchant Password Gate & Config (never readable by clients)
+    match /adminAuth/gate {
+      allow read: if false;
+      allow create, update: if isValidAdminGate(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isValidAdminProof(incoming().proof);
+      allow delete: if false;
+    }
+
+    match /adminAuth/config {
+      allow read: if false;
+      allow create, update: if isValidAdminConfig(incoming()) &&
+        incoming().updatedAt == request.time &&
+        hasValidBatchGate();
+      allow delete: if false;
+    }
+
+    // Public BSBlooms Catalog Varieties
+    match /catalogVarieties/{flowerId} {
+      allow get: if isValidId(flowerId);
+      allow list: if true;
+
+      allow create: if isValidId(flowerId) &&
+        isValidCatalogVariety(incoming(), flowerId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (isAdmin() || hasValidBatchGate());
+
+      allow update: if isValidId(flowerId) &&
+        isValidCatalogVariety(incoming(), flowerId) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'orderIndex', 'nameEn', 'color', 'cropEn', 'typeEn',
+          'breederCode', 'stemLength', 'extraSpecEn',
+          'availability', 'photos', 'updatedAt'
+        ]) &&
+        (isAdmin() || hasValidBatchGate());
+
+      allow delete: if isValidId(flowerId) &&
+        (isAdmin() || hasValidBatchGate());
+    }
+
+    // Public BSBlooms Store Settings
+    match /catalogMeta/{metaId} {
+      allow get: if isValidId(metaId) && metaId == 'store';
+      allow list: if false;
+
+      allow create: if isValidId(metaId) &&
+        metaId == 'store' &&
+        isValidCatalogMeta(incoming()) &&
+        incoming().updatedAt == request.time &&
+        (isAdmin() || hasValidBatchGate());
+
+      allow update: if isValidId(metaId) &&
+        metaId == 'store' &&
+        isValidCatalogMeta(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'shopNameEn', 'phone', 'whatsapp',
+          'locationEn', 'hoursEn', 'catalogInitialized', 'updatedAt'
+        ]) &&
+        (isAdmin() || hasValidBatchGate());
+
+      allow delete: if false;
+    }
+
+    // Legacy Public Flowers Collection
     match /flowers/{flowerId} {
       allow get: if isValidId(flowerId);
       allow list: if true;
@@ -145,7 +300,7 @@ service cloud.firestore {
       allow delete: if isAdmin() && isValidId(flowerId);
     }
 
-    // Public Store Settings
+    // Legacy Public Store Settings
     match /settings/{settingId} {
       allow get: if isValidId(settingId) && settingId == 'store';
       allow list: if false;

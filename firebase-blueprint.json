@@ -1,8 +1,8 @@
 {
   "entities": {
-    "Flower": {
-      "title": "Flower Variety",
-      "description": "A bilingual BS Blooms flower variety with display order, specifications, availability, pricing, and photos.",
+    "CatalogVariety": {
+      "title": "BSBlooms Catalog Variety",
+      "description": "A BSBlooms greenhouse flower variety displayed on the vertical swipe showcase.",
       "type": "object",
       "properties": {
         "id": {
@@ -18,95 +18,54 @@
         },
         "nameEn": {
           "type": "string",
-          "description": "Variety name in English",
+          "description": "Variety name",
           "minLength": 1,
           "maxLength": 100
         },
-        "nameHi": {
+        "color": {
           "type": "string",
-          "description": "Variety name in Hindi",
-          "minLength": 1,
-          "maxLength": 120
+          "description": "Flower petal color label",
+          "minLength": 0,
+          "maxLength": 60
         },
         "cropEn": {
           "type": "string",
-          "description": "Crop name in English (e.g., Gerbera)",
+          "description": "Crop name (e.g., Gerbera)",
           "minLength": 0,
           "maxLength": 60
-        },
-        "cropHi": {
-          "type": "string",
-          "description": "Crop name in Hindi (e.g., जरबेरा)",
-          "minLength": 0,
-          "maxLength": 80
         },
         "typeEn": {
           "type": "string",
-          "description": "Flower type in English (e.g., Standard)",
+          "description": "Flower type (e.g., Standard · Semi-double)",
           "minLength": 0,
           "maxLength": 60
         },
-        "typeHi": {
-          "type": "string",
-          "description": "Flower type in Hindi",
-          "minLength": 0,
-          "maxLength": 80
-        },
         "breederCode": {
           "type": "string",
-          "description": "Breeder code or catalog code",
+          "description": "Breeder code or VBN catalog code",
           "minLength": 0,
           "maxLength": 60
         },
         "stemLength": {
           "type": "string",
-          "description": "Stem length specification (e.g., 60 - 65 cm)",
+          "description": "Stem length specification (e.g., 60 cm)",
           "minLength": 0,
           "maxLength": 60
         },
         "extraSpecEn": {
           "type": "string",
-          "description": "Additional specifications in English",
+          "description": "Additional cultivar traits (diameter, vase life, center)",
           "minLength": 0,
           "maxLength": 240
-        },
-        "extraSpecHi": {
-          "type": "string",
-          "description": "Additional specifications in Hindi",
-          "minLength": 0,
-          "maxLength": 280
         },
         "availability": {
           "type": "string",
           "description": "Current stock status",
           "enum": ["in_stock", "limited", "out_of_stock"]
         },
-        "price": {
-          "type": "number",
-          "description": "Optional price in INR; null when price is on inquiry"
-        },
-        "unitEn": {
-          "type": "string",
-          "description": "Unit label in English",
-          "minLength": 0,
-          "maxLength": 40
-        },
-        "unitHi": {
-          "type": "string",
-          "description": "Unit label in Hindi",
-          "minLength": 0,
-          "maxLength": 50
-        },
         "photos": {
           "type": "array",
           "description": "List of 1 to 5 photo URLs or compressed data URIs"
-        },
-        "createdBy": {
-          "type": "string",
-          "description": "Firebase Auth UID of the merchant creator",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^[a-zA-Z0-9_\\-]+$"
         },
         "createdAt": {
           "type": "string",
@@ -123,40 +82,28 @@
         "id",
         "orderIndex",
         "nameEn",
-        "nameHi",
+        "color",
         "cropEn",
-        "cropHi",
         "typeEn",
-        "typeHi",
         "breederCode",
         "stemLength",
         "extraSpecEn",
-        "extraSpecHi",
         "availability",
-        "unitEn",
-        "unitHi",
         "photos",
-        "createdBy",
         "createdAt",
         "updatedAt"
       ]
     },
-    "StoreSettings": {
-      "title": "Store Settings",
-      "description": "Publicly readable BS Blooms merchant contact information.",
+    "CatalogMeta": {
+      "title": "BSBlooms Store Settings",
+      "description": "Publicly readable BSBlooms merchant contact information and catalog initialization flag.",
       "type": "object",
       "properties": {
         "shopNameEn": {
           "type": "string",
-          "description": "Shop name in English",
+          "description": "Brand name",
           "minLength": 1,
           "maxLength": 80
-        },
-        "shopNameHi": {
-          "type": "string",
-          "description": "Shop name in Hindi",
-          "minLength": 1,
-          "maxLength": 100
         },
         "phone": {
           "type": "string",
@@ -174,34 +121,19 @@
         },
         "locationEn": {
           "type": "string",
-          "description": "Location in English",
+          "description": "Dispatch or location label",
           "minLength": 0,
           "maxLength": 120
         },
-        "locationHi": {
-          "type": "string",
-          "description": "Location in Hindi",
-          "minLength": 0,
-          "maxLength": 150
-        },
         "hoursEn": {
           "type": "string",
-          "description": "Market hours in English",
+          "description": "Business hours label",
           "minLength": 0,
           "maxLength": 80
         },
-        "hoursHi": {
-          "type": "string",
-          "description": "Market hours in Hindi",
-          "minLength": 0,
-          "maxLength": 100
-        },
-        "updatedBy": {
-          "type": "string",
-          "description": "Firebase Auth UID of merchant",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        "catalogInitialized": {
+          "type": "boolean",
+          "description": "Whether initial catalog varieties have been seeded to Firestore"
         },
         "updatedAt": {
           "type": "string",
@@ -211,15 +143,110 @@
       },
       "required": [
         "shopNameEn",
-        "shopNameHi",
         "phone",
         "whatsapp",
         "locationEn",
-        "locationHi",
         "hoursEn",
-        "hoursHi",
-        "updatedBy",
+        "catalogInitialized",
         "updatedAt"
+      ]
+    },
+    "AdminAuthConfig": {
+      "title": "Admin Password Config",
+      "description": "Private non-readable document holding the double-SHA-256 hash of the merchant admin password.",
+      "type": "object",
+      "properties": {
+        "passwordDoubleHash": {
+          "type": "string",
+          "description": "Lowercase 64-char hex SHA-256 hash of the admin proof",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest password update"
+        }
+      },
+      "required": ["passwordDoubleHash", "updatedAt"]
+    },
+    "AdminAuthGate": {
+      "title": "Admin Auth Gate",
+      "description": "Private write-only document verified atomically via getAfter in merchant write batches.",
+      "type": "object",
+      "properties": {
+        "proof": {
+          "type": "string",
+          "description": "Lowercase 64-char hex salted SHA-256 password proof",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp matching the atomic batch request.time"
+        }
+      },
+      "required": ["proof", "updatedAt"]
+    },
+    "Flower": {
+      "title": "Legacy Flower Variety",
+      "description": "Legacy flower variety schema preserved for backward compatibility.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orderIndex": { "type": "number" },
+        "nameEn": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "nameHi": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "cropEn": { "type": "string", "minLength": 0, "maxLength": 60 },
+        "cropHi": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "typeEn": { "type": "string", "minLength": 0, "maxLength": 60 },
+        "typeHi": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "breederCode": { "type": "string", "minLength": 0, "maxLength": 60 },
+        "stemLength": { "type": "string", "minLength": 0, "maxLength": 60 },
+        "extraSpecEn": { "type": "string", "minLength": 0, "maxLength": 240 },
+        "extraSpecHi": { "type": "string", "minLength": 0, "maxLength": 280 },
+        "availability": { "type": "string", "enum": ["in_stock", "limited", "out_of_stock"] },
+        "price": { "type": "number" },
+        "unitEn": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "unitHi": { "type": "string", "minLength": 0, "maxLength": 50 },
+        "photos": { "type": "array" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id", "orderIndex", "nameEn", "nameHi", "cropEn", "cropHi",
+        "typeEn", "typeHi", "breederCode", "stemLength", "extraSpecEn", "extraSpecHi",
+        "availability", "unitEn", "unitHi", "photos", "createdBy", "createdAt", "updatedAt"
+      ]
+    },
+    "StoreSettings": {
+      "title": "Legacy Store Settings",
+      "description": "Legacy store settings schema preserved for backward compatibility.",
+      "type": "object",
+      "properties": {
+        "shopNameEn": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "shopNameHi": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "phone": { "type": "string", "minLength": 6, "maxLength": 20, "pattern": "^\\+?[0-9\\- ]{6,20}$" },
+        "whatsapp": { "type": "string", "minLength": 8, "maxLength": 18, "pattern": "^[0-9]{8,18}$" },
+        "locationEn": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "locationHi": { "type": "string", "minLength": 0, "maxLength": 150 },
+        "hoursEn": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "hoursHi": { "type": "string", "minLength": 0, "maxLength": 100 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "shopNameEn", "shopNameHi", "phone", "whatsapp",
+        "locationEn", "locationHi", "hoursEn", "hoursHi", "updatedBy", "updatedAt"
       ]
     },
     "AdminUser": {
@@ -227,35 +254,37 @@
       "description": "Authorized BS Blooms merchant administrator.",
       "type": "object",
       "properties": {
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "Verified Google account email",
-          "minLength": 3,
-          "maxLength": 150
-        },
-        "role": {
-          "type": "string",
-          "description": "Administrator role",
-          "enum": ["admin"]
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Server timestamp when admin access was granted"
-        }
+        "email": { "type": "string", "format": "email", "minLength": 3, "maxLength": 150 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email", "role", "createdAt"]
     }
   },
   "firestore": {
+    "/catalogVarieties/{flowerId}": {
+      "schema": { "$ref": "#/entities/CatalogVariety" },
+      "description": "Public BSBlooms Gerbera showcase varieties ordered by orderIndex."
+    },
+    "/catalogMeta/{metaId}": {
+      "schema": { "$ref": "#/entities/CatalogMeta" },
+      "description": "Public BSBlooms contact settings document (/catalogMeta/store)."
+    },
+    "/adminAuth/config": {
+      "schema": { "$ref": "#/entities/AdminAuthConfig" },
+      "description": "Non-readable merchant password double-hash configuration."
+    },
+    "/adminAuth/gate": {
+      "schema": { "$ref": "#/entities/AdminAuthGate" },
+      "description": "Non-readable atomic batch proof verification gate."
+    },
     "/flowers/{flowerId}": {
       "schema": { "$ref": "#/entities/Flower" },
-      "description": "Public BS Blooms flower variety showcase ordered by orderIndex."
+      "description": "Legacy flower collection."
     },
     "/settings/{settingId}": {
       "schema": { "$ref": "#/entities/StoreSettings" },
-      "description": "Public BS Blooms contact and shop settings."
+      "description": "Legacy settings collection."
     },
     "/admins/{adminUid}": {
       "schema": { "$ref": "#/entities/AdminUser" },
