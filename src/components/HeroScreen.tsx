@@ -6,7 +6,7 @@ interface HeroScreenProps {
   onSwipeDown: () => void;
 }
 
-const GREETING_TEXT = 'Hello';
+const GREETING_TEXT = 'Hello...';
 
 export function HeroScreen({ onSwipeDown }: HeroScreenProps) {
   const [visibleChars, setVisibleChars] = useState(0);
